@@ -20,16 +20,7 @@ volcplot <- function(data, sig, fc, prefix, format) {
 
   # Make a dataset for plotting, add the status as a new column
 
-  plot_ready_data <- na.omit(data) %>%
-    mutate(
-      log2fc_threshold = (if ((log2FoldChange >= pos_log2fc) & (padj <= sig)) {
-                           'up'
-                         } else if ((log2FoldChange <=  neg_log2fc) & (padj <= sig)) {
-                           'down'
-                         } else {
-                           'unchanged'
-                         })
-    )
+  plot_ready_data <- na.omit(data) %>% mutate(log2fc_threshold = ifelse((log2FoldChange >= pos_log2fc) & (padj <= sig), 'up', ifelse((log2FoldChange <= neg_log2fc) & (padj <= sig), 'down', 'unchanged')))
 
   # Get the number of up, down, and unchanged genes
 
