@@ -1,2 +1,2 @@
-# volcano_plotteR
-Turning my oft-reused volcano plot R function into a script. WIP.
+# genomics_visualization
+A repository of oft-reused code for genomics data visualizations.
