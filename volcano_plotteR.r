@@ -58,10 +58,10 @@ volcplot <- function(data, padj_threshold, fc, out_prefix, format) {
     geom_point(alpha = 0.4, size = 1.5) +
     aes(x=log2FoldChange, y = -log10(padj), color = log2fc_threshold) +
     geom_vline(xintercept = c(neg_log2fc, pos_log2fc), linetype = 'dotted') +
-    geom_hline(yintercept = -log10(sig), linetype = 'dotted') +
+    geom_hline(yintercept = -log10(padj_threshold), linetype = 'dotted') +
     scale_x_continuous('log2(FC)', limits = c(-x_axis_limits, x_axis_limits)) +
     scale_color_manual(values = plot_colors, labels = legend_labels) +
-    labs(color = str_c(fc, '-fold, padj ≤', sig)) +
+    labs(color = str_c(fc, '-fold, padj ≤', padj_threshold)) +
     theme(aspect.ratio = 1) +
-    ggsave(str_c(out_prefix, '_volcano_fc_', fc, '_padj_', sig, '.', format))
+    ggsave(str_c(out_prefix, '_volcano_fc_', fc, '_padj_', padj_threshold, '.', format))
 }
