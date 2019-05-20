@@ -42,7 +42,7 @@ volcplot <- function(data, padj_threshold, fc, out_prefix, format) {
   # Set the x axis limits, rounded to the next even number
 
   x_axis_limits <- RoundTo(
-    log2(max(abs(log2FoldChange))), 2, ceiling
+    max(abs(log2FoldChange)), 2, ceiling
   )
 
   # Set the plot colors
