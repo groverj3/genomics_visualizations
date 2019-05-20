@@ -1,17 +1,15 @@
-#!/usr/bin/env Rscript
-
 # Author: Jeffrey Grover
 # Purpose: Volcano PlotteR is an R script to generate volcano plots
 # Created: 2019-04-19
-# Usage: Load the results output from DESeq2
+# Usage: Load the results output from DESeq2 as a data frame, the
+# input data must have columns for log2FoldChange and padj
 
 library(dplyr)
 library(ggplot2)
-library(argparse)
 
-# Define the function here
+# Load this function and the above libraries
 
-volcplot <- function(data, sig, fc, prefix, format) {
+volcplot <- function(data, sig, fc, out_prefix, format) {
 
   # Set the fold-change thresholds
 
@@ -20,7 +18,12 @@ volcplot <- function(data, sig, fc, prefix, format) {
 
   # Make a dataset for plotting, add the status as a new column
 
-  plot_ready_data <- na.omit(data) %>% mutate(log2fc_threshold = ifelse((log2FoldChange >= pos_log2fc) & (padj <= sig), 'up', ifelse((log2FoldChange <= neg_log2fc) & (padj <= sig), 'down', 'unchanged')))
+  plot_ready_data <- na.omit(data) %>%
+    mutate(log2fc_threshold = ifelse((log2FoldChange >= pos_log2fc) & (padj <= sig), 'up',
+                              ifelse((log2FoldChange <= neg_log2fc) & (padj <= sig), 'down',
+                                     'unchanged')
+                                    )
+          )
 
   # Get the number of up, down, and unchanged genes
 
@@ -28,34 +31,33 @@ volcplot <- function(data, sig, fc, prefix, format) {
   down_genes <- plot_ready_data %>% filter(log2fc_threshold == 'down') %>% nrow()
   unchanged_genes <- plot_ready_data %>% filter(log2fc_threshold == 'unchanged') %>% nrow()
 
-  # Make the plot, this is a WIP to generalize
+  # Make the labels for the legend
+
+  legend_labels <- c(str_c('Down: ', down_genes), str_c('Unchanged: ', unchanged_genes),
+                     str_c('Up: ', up_genes)
+                    )
+
+  # Set the x axis limits, rounded to the next even number
+
+  x_axis_limits <- RoundTo(
+    log2(max(log2FoldChange)), 2, ceiling
+  )
+  x_axis_limits <- c(-x_axis_limits, x_axis_limits)
+
+  # Set the plot colors
+
+  plot_colors <- c('down' = 'dodgerblue1', 'unchanged' = 'gray', 'up' = 'firebrick1')
+
+  # Make the plot, these options are a reasonable strting point
 
   ggplot(plot_ready_data) +
     geom_point(alpha = 0.4, size = 1.5) +
     aes(x=log2FoldChange, y = -log10(padj), color = log2fc_threshold) +
     geom_vline(xintercept = c(neg_log2fc, pos_log2fc), linetype = 'dotted') +
     geom_hline(yintercept = -log10(sig), linetype = 'dotted') +
-    scale_x_continuous('log2(FC)', limits = c(-12, 12), breaks = seq(from = -12, to = 12, by = 4)) +
-    scale_color_manual(values = c('down' = 'dodgerblue1', 'unchanged' = 'gray', 'up' = 'firebrick1'), labels = c(str_c('Down: ', down_genes), str_c('Unchanged: ', unchanged_genes), str_c('Up: ', up_genes))) +
+    scale_x_continuous('log2(FC)', limits = x_axis_limits) +
+    scale_color_manual(values = plot_colors, labels = legend_labels) +
     labs(color = str_c(fc, '-fold, padj ≤', sig)) +
     theme(aspect.ratio = 1) +
-    ggsave(str_c(prefix, '_volcano_fc_', fc, '_padj_', sig, '.', format))
+    ggsave(str_c(out_prefix, '_volcano_fc_', fc, '_padj_', sig, '.', format))
 }
-
-# Attempt to write a command line parser in R
-
-parser <- ArgumentParser(description='Make a volcano plot from DESeq2 results. In other words, a table with gene IDs, log2FoldChange, and padj columns.')
-parser$add_argument('-s', '--sig',
-                    type='double',
-                    default=0.05,
-                    help='The BH-adjusted p-value to use for a significance threshold',
-                    metavar='padj')
-format_group <- parser$add_mutually_exclusive_group()
-format_group$add_argument('--png', action='store_true')
-format_group$add_argument('--svg', action='store_true')
-
-args <- parser$parse_args()
-
-# Run the function, make the plot
-
-volcplot(file, sig, fc, prefix, format)
