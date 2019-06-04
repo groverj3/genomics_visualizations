@@ -15,7 +15,7 @@ metaplot <- function(data, window_size, x_labels, y_axis_label, out_prefix, form
   # For now the plot labels at 16 discrete intervals, so the x_labels vector must
   # also be 16 items in length. Position 6 corresponds to the start of the
   # feature, and 11 corresponds to the end of the feature.
-  
+ 
   ggplot(data, aes(x = bin, y = value, group = genotype, color = genotype)) +
     geom_smooth(span = 0.2, se = FALSE) +
     scale_x_continuous(breaks = c(0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60),
