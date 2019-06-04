@@ -19,19 +19,19 @@ library(ggridges)
 # (columns) "sample" and "expression"
 
 ggplot(data, aes(y = sample, x = expression, fill = sample)) +
-    geom_density_ridges2(scale = 0.95, 
+    geom_density_ridges2(scale = 0.95,
                           jittered_points = TRUE,
                           position = position_points_jitter(width = 0.05, height = 0),
-                          point_shape = '|', 
-                          point_size = 3, 
-                          point_alpha = 0.5, 
+                          point_shape = '|',
+                          point_size = 3,
+                          point_alpha = 0.5,
                           alpha = 1) +
     stat_density_ridges(quantile_lines = TRUE, scale = 0.95) +
     theme_bw(base_size = 24) +
     scale_x_continuous(limits = c(0, 14)) +
     scale_y_discrete(expand = expand_scale(add = c(0.2, 0.8))) +
     scale_fill_manual(values = rev(c('#E69F00', '#56B4E9', '#CC79A7', '#D55E00', '#0072B2', '#009E73'))) +
-    theme(axis.title.y = element_blank(), 
+    theme(axis.title.y = element_blank(),
           axis.text.y = element_text(color = 'black'),
           axis.text.x = element_text(color = 'black'),
           legend.title = element_blank(),
