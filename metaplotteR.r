@@ -6,7 +6,6 @@
 # Usage: Reads the table from deeptools' metaplot and makes a prettier one
 
 library(argparser, quietly=TRUE)
-suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 suppressMessages(library(tidyr))
 
