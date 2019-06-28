@@ -18,7 +18,7 @@ read_deeptools_table <- function(file) {
   x <- readLines(file)
 
   .splitvar <- function(x, sep, n) {
-    var <- unlist(strsplit(x, split = '\t'))
+    var <- unlist(strsplit(x, split = sep))
     length(var) <- n
     return(var)
   }
