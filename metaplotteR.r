@@ -25,7 +25,7 @@ read_deeptools_table <- function(file) {
 
   x <- do.call(cbind, lapply(x, .splitvar, sep = '\t', n = n))
   x <- apply(x, 1, paste, collapse = '\t')
-  plot_table <- na.omit(read.csv(text = x, sep = '\t')[-1,])  # Remove first row
+  plot_table <- na.omit(read.csv(text = x, sep = '\t')[-1, ])  # Remove first row
 
   return(plot_table)
 }
@@ -128,8 +128,7 @@ get_args <- function() {
 
 # Main function entry point
 
-
-main <- function() {
+main <- function () {
 
   args <- get_args()
 
@@ -141,5 +140,7 @@ main <- function() {
            args$span, args$output_prefix, args$format, args$smooth, args$line,
            args$aspect, args$width, args$height, args$colors)
 }
+
+# Call main
 
 main()
