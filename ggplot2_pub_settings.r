@@ -4,10 +4,10 @@
 # Usage: Load the libraries specified and add to ggplot2 plots
 
 library(ggplot2)
-library(RColorBrewer)
 
 # The accent palette is pretty nice with a little reordering to taste
 
+library(RColorBrewer)
 color_brewer_palette <- rev(brewer.pal(6, 'Accent'))[c(2, 6, 3:5, 1)]
 
 # This palette is good, I like it better in reverse though
@@ -17,10 +17,13 @@ color_brewer_palette <- rev(brewer.pal(6, 'Accent'))[c(2, 6, 3:5, 1)]
 colorblind_palette<- rev(c('#999999', '#E69F00', '#56B4E9', '#009E73', '#F0E442',
                            '#0072B2', '#D55E00', '#CC79A7'))
 
+# For continuous scales, use viridis
+library(viridis)
+
 # Set the size of the plots
 
-plot_wdith <- 8
-plot_height <- 8
+plot_wdith <- 7
+plot_height <- 7
 
 # Put the following in a jupyter notebook to change the plot size there
 
@@ -31,16 +34,16 @@ options(repr.plot.width = plot_wdith, repr.plot.height = plot_height)
 
 plot +
   theme_bw(base_size = 24) +
-    guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
     theme_bw() +
     theme(
           axis.text = element_text(color = 'black'),
           legend.position = 'bottom',
           legend.direction = 'horizontal',
           legend.margin = margin(0,0,0,0),
-          legend.box.margin = margin(-10,-10,-10,-10),
+          legend.box.margin = margin(-10,-10,-10,-10),  # Reduces dead area around legend
           legend.spacing.x = unit(0.2, 'cm')
     ) +
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +  # fill or color here, makes legend one row
   ggsave('filename.svg', width = plot_wdith, height = plot_height)
 
 # For rotating x axis text the following is helpful, especially for long labels
