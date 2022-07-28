@@ -5,9 +5,8 @@
 # Created: 2019-06-26
 # Usage: Reads the table from deeptools' metaplot and makes a prettier one
 
-library(argparser, quietly=TRUE)
-suppressMessages(library(ggplot2))
-suppressMessages(library(tidyr))
+library(ggplot2)
+library(tidyr)
 
 
 # Define functions
@@ -33,14 +32,13 @@ read_deeptools_table <- function(file) {
 
 table_to_long <- function(plot_table) {
 
-  long_table <- gather(plot_table, 'sample', 'score', -bin.labels, -bins)
+  long_table <- gather(plot_table, 'sample', 'score', bin.labels, bins)
   return(long_table)
-}
+ }
 
 
 metaplot <- function(long_table, start_label, end_label, y_axis_label, span,
-                     out_prefix, format, smooth, line, aspect, width, height,
-                     colors) {
+                     smooth, line, aspect, colors) {
 
   start_bin <- subset(long_table, bin.labels == start_label)$bins
   end_bin <- subset(long_table, bin.labels == end_label)$bins
@@ -67,80 +65,5 @@ metaplot <- function(long_table, start_label, end_label, y_axis_label, span,
           axis.ticks.x = element_blank(),
           panel.grid.major.x = element_blank(),
           panel.grid.minor.x = element_blank(),
-          aspect.ratio = aspect) +
-    ggsave(paste0(out_prefix, '.', format),
-           width = width,
-           height = height)
+          aspect.ratio = aspect)
 }
-
-
-# Parse arguments
-
-get_args <- function() {
-
-  parser <- arg_parser(
-    paste0('metaplotteR will read a table output from deeptools\' plotProfile ',
-           'command, load it into R, and make a new metaplot with ggplot!')
-  )
-  parser <- add_argument(parser, '--output_prefix',
-                         default='metaplot',
-                         help='Prefix to add to output plot')
-  parser <- add_argument(parser, '--start_label',
-                         default='start',
-                         help='Label for the start of the features, must match the table.')
-  parser <- add_argument(parser, '--end_label',
-                         default='end',
-                         help='Label for the end of the features, must match the table.')
-  parser <- add_argument(parser, '--y_axis',
-                         default='Coverage',
-                         help='Label (units) for the y-axis')
-  parser <- add_argument(parser, '--line',
-                         flag=TRUE,
-                         help='Generate a line plot with no smoothing.')
-  parser <- add_argument(parser, '--smooth',
-                         flag=TRUE,
-                         help='Smooth the metaplot with geom_smooth')
-  parser <- add_argument(parser, '--span',
-                         type='numeric',
-                         default=0.2,
-                         help='Value for span in geom_smooth, smaller values are wigglier.')
-  parser <- add_argument(parser, '--format',
-                         default='png',
-                         help='Image format. [png|svg|jpeg|pdf|bmp|tiff|eps|ps]')
-  parser <- add_argument(parser, '--aspect',
-                         type='numeric',
-                         default=0.5,
-                         help='Aspect ratio for the output plot')
-  parser <- add_argument(parser, '--width',
-                         default=7.0,
-                         help='Width for the output plot')
-  parser <- add_argument(parser, '--height',
-                         default=5.0,
-                         help='Height for the output plot.')
-  parser <- add_argument(parser, '--colors',
-                         default='ggplot',
-                         help='Comma separated list of colors for samples on plot.')
-  parser <- add_argument(parser, 'input_file',
-                         help='Deeptools plotProfile table')
-  return(parse_args(parser))
-}
-
-
-# Main function entry point
-
-main <- function () {
-
-  args <- get_args()
-
-  deeptools_table <- read_deeptools_table(args$input_file)
-
-  deeptools_table <- table_to_long(deeptools_table)
-
-  metaplot(deeptools_table, args$start_label, args$end_label, args$y_axis,
-           args$span, args$output_prefix, args$format, args$smooth, args$line,
-           args$aspect, args$width, args$height, args$colors)
-}
-
-# Call main
-
-main()

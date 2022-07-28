@@ -41,5 +41,5 @@ ggplot(data, aes(y = sample, x = expression, fill = sample)) +
           axis.text.x = element_text(color = 'black'),
           legend.title = element_blank(),
           legend.position = 'none') +
-    xlab('Expression') +
+    xlab('Expression')
     ggsave(str_c(out_dir, 'out_filename.svg'), width = 10, height = 8)
