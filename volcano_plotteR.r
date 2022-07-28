@@ -32,10 +32,11 @@ volcplot <- function(data, padj_threshold, fc) {
 
   # Make the labels for the legend
 
-  legend_labels <- c(str_c('Down: ', down_genes),
-                     str_c('NS: ', unchanged_genes),
-                     str_c('Up: ', up_genes)
-                    )
+  legend_labels <- c(
+      str_c('Up: ', up_genes),
+      str_c('NS: ', unchanged_genes),
+      str_c('Down: ', down_genes)
+  )
 
   # Set the x axis limits, rounded to the next even number
 
@@ -45,10 +46,12 @@ volcplot <- function(data, padj_threshold, fc) {
 
   # Set the plot colors
 
-  plot_colors <- c('down' = 'dodgerblue1',
-                   'ns' = 'gray',
-                   'up' = 'firebrick1'
-                   )
+  plot_colors <- c(
+      'up' = 'firebrick1',
+      'ns' = 'gray',
+      'down' = 'dodgerblue1'
+  )
+
 
   # Make the plot, these options are a reasonable strting point
 
