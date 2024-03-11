@@ -8,7 +8,7 @@ library(dplyr)
 library(ggplot2)
 library(ggrepel)  # For displaying gene labels, if you don't want them you can omit this library
 
-volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano Plot', plot_subtitle = NULL, genelist_vector = NULL) {
+volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano Plot', plot_subtitle = NULL, genelist_vector = NULL, genelist_filter = FALSE) {
 
   # Set the fold-change thresholds
   neg_log2fc <- -log2(fc)
@@ -21,8 +21,15 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
                          ifelse(log2FoldChange <= neg_log2fc & padj <= padj_threshold, 'down', 'ns')
         )
     ) %>%
-    mutate(hgnc_symbol = replace_na(hgnc_symbol, 'none')) %>%
-    mutate(hgnc_symbol = ifelse(hgnc_symbol %in% genelist_vector & padj < padj_threshold & log2fc_threshold != 'ns', hgnc_symbol, ''))
+    mutate(hgnc_symbol = replace_na(hgnc_symbol, 'none'))
+
+  if (genelist_filter) {
+    plot_ready_data <- plot_ready_data %>% filter(hgnc_symbol %in% genelist_vector)
+  }
+  
+  if(!is.null(genelist_vector)) {
+    plot_ready_data <- plot_ready_data %>% mutate(hgnc_symbol = ifelse(hgnc_symbol %in% genelist_vector & padj < padj_threshold & log2fc_threshold != 'ns', hgnc_symbol, ''))
+  }
 
   # Get the number of up, down, and unchanged genes
   up_genes <- plot_ready_data %>% filter(log2fc_threshold == 'up') %>% nrow()
