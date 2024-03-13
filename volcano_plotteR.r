@@ -15,7 +15,9 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
   pos_log2fc <- log2(fc)
 
   # Make a dataset for plotting, add the status as a new column
-  plot_ready_data <- data %>% mutate_at('padj', ~replace(.x, is.na(.x), 1)) %>%
+  plot_ready_data <- data %>%
+    mutate_at('padj', ~replace(.x, is.na(.x), 1)) %>%
+    mutate_at('log2FoldChange', ~replace(.x, is.na(.x), 0)) %>%
     mutate(
       log2fc_threshold = ifelse(log2FoldChange >= pos_log2fc & padj <= padj_threshold, 'up',
                          ifelse(log2FoldChange <= neg_log2fc & padj <= padj_threshold, 'down', 'ns')
@@ -59,7 +61,7 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
 
 
   # Make the plot, these options are a reasonable strting point
-  ggplot(plot_ready_data) +
+  plot <- ggplot(plot_ready_data) +
     geom_point(
       alpha = 0.25,
       size = 1.5
@@ -77,15 +79,6 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
     geom_hline(
       yintercept = -log10(padj_threshold),
       linetype = 'dashed'
-    ) +
-    geom_label_repel(
-      size = 6,
-      force = 0.1,
-      max.overlaps = 100000,
-      nudge_x = 1,
-      segment.color = 'black',
-      min.segment.length = 0,
-      show.legend = FALSE
     ) +
     scale_x_continuous(
       'log2(FC)',
@@ -108,4 +101,19 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
       legend.box.margin = margin(0, 0, 0, 0),  # Reduces dead area around legend
       legend.spacing.x = unit(0.2, 'cm')
     )
+
+    # Add gene labels if needed
+    if (!is.null(genelist_vector)) {
+        plot <- plot +
+        geom_label_repel(
+          size = 6,
+          force = 0.1,
+          max.overlaps = 100000,
+          nudge_x = 1,
+          segment.color = 'black',
+          min.segment.length = 0,
+          show.legend = FALSE
+        )
+    }
+    plot
 }
