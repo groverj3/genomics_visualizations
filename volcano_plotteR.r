@@ -4,11 +4,25 @@
 # Usage: Load the results output from DESeq2 as a data frame, the input data
 # must have columns for log2FoldChange and padj
 
+library(tidyr)
 library(dplyr)
+library(stringr)
 library(ggplot2)
-library(ggrepel)  # For displaying gene labels, if you don't want them you can omit this library
+library(ggrepel)  # For labeling
+library(DescTools)  # For rounding
+library(rlang)  # For injecting the label column programmatically
 
-volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano Plot', plot_subtitle = NULL, genelist_vector = NULL, genelist_filter = FALSE) {
+volcplot <- function(
+  data,
+  padj_threshold = 0.05,
+  foldchange_threshold = 1,
+  plot_title = "Volcano Plot",
+  plot_subtitle = NULL,
+  label_column = "hgnc_symbol",
+  genelist_vector = NULL,
+  genelist_filter = FALSE,
+  genelist_label = FALSE
+) {
 
   # Set the fold-change thresholds
   neg_log2fc <- -log2(fc)
@@ -23,20 +37,29 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
                          ifelse(log2FoldChange <= neg_log2fc & padj <= padj_threshold, 'down', 'ns')
         )
     ) %>%
-    mutate(hgnc_symbol = replace_na(hgnc_symbol, 'none'))
+    mutate(label_column = replace_na(!!sym(label_column), "none"))
 
   if (genelist_filter) {
     plot_ready_data <- plot_ready_data %>% filter(hgnc_symbol %in% genelist_vector)
   }
-  
+
   if(!is.null(genelist_vector)) {
-    plot_ready_data <- plot_ready_data %>% mutate(hgnc_symbol = ifelse(hgnc_symbol %in% genelist_vector & padj < padj_threshold & log2fc_threshold != 'ns', hgnc_symbol, ''))
+    plot_ready_data <- plot_ready_data |>
+      mutate(
+        !!sym(label_column) := (
+          ifelse(
+            !!sym(label_column) %in% genelist_vector & padj < padj_threshold & log2fc_threshold != "ns",
+            !!sym(label_column),
+            ""
+          )
+        )
+      )
   }
 
   # Get the number of up, down, and unchanged genes
-  up_genes <- plot_ready_data %>% filter(log2fc_threshold == 'up') %>% nrow()
-  down_genes <- plot_ready_data %>% filter(log2fc_threshold == 'down') %>% nrow()
-  unchanged_genes <- plot_ready_data %>% filter(log2fc_threshold == 'ns') %>% nrow()
+  up_genes <- plot_ready_data %>% filter(log2fc_threshold == 'up') %>% NROW()()
+  down_genes <- plot_ready_data %>% filter(log2fc_threshold == 'down') %>% NROW()()
+  unchanged_genes <- plot_ready_data %>% filter(log2fc_threshold == 'ns') %>% NROW()
 
   # Make the labels for the legend
   legend_labels <- c(
@@ -60,7 +83,7 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
   )
 
 
-  # Make the plot, these options are a reasonable strting point
+  # Make the plot, these options are a reasonable starting point
   plot <- ggplot(plot_ready_data) +
     geom_point(
       alpha = 0.25,
@@ -70,7 +93,7 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
       x = log2FoldChange,
       y = -log10(padj),
       color = log2fc_threshold,
-      label = hgnc_symbol
+      label = !!sym(label_column)
     ) +
     geom_vline(
       xintercept = c(neg_log2fc, pos_log2fc),
@@ -102,18 +125,19 @@ volcplot <- function(data, padj_threshold = 0.05, fc = 1, plot_title = 'Volcano 
       legend.spacing.x = unit(0.2, 'cm')
     )
 
-    # Add gene labels if needed
-    if (!is.null(genelist_vector)) {
-        plot <- plot +
-        geom_label_repel(
-          size = 6,
-          force = 0.1,
-          max.overlaps = 100000,
-          nudge_x = 1,
-          segment.color = 'black',
-          min.segment.length = 0,
-          show.legend = FALSE
-        )
-    }
+  # Add gene labels if needed
+  if (genelist_label && !is.null(genelist_vector)) {
+    plot <- plot +
+      geom_label_repel(
+        size = 6,
+        force = 0.1,
+        max.overlaps = 100000,
+        max.iter = 1000000,
+        nudge_x = 1,
+        segment.color = "black",
+        min.segment.length = 0,
+        show.legend = FALSE
+      )
+  }
     plot
 }

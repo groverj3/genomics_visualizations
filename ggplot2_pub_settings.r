@@ -43,7 +43,7 @@ plot +
           legend.box.margin = margin(-10,-10,-10,-10),  # Reduces dead area around legend
           legend.spacing.x = unit(0.2, 'cm')
     ) +
-  guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +  # fill or color here, makes legend one row
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE))  # fill or color here, makes legend one row
   ggsave('filename.svg', width = plot_wdith, height = plot_height)
 
 # For rotating x axis text the following is helpful, especially for long labels
